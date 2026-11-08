@@ -22,6 +22,6 @@
   - 文件：dto/ConceptMasteryResponse、dto/ParentReportResponse、service/MasteryReportService、controller/ReportController
   - 验收：GET /students/{id}/mastery 按 concept 汇总 attempts、correct、mastery；GET /students/{id}/report 含 studentName、总提交次数、最近提交时间、概念列表、weakestConcept（attempts ≥ 1 中最低者）；学生不存在返回 404
 
-- [ ] **T6 种子数据与全链路交付 README**
+- [x] **T6 种子数据与全链路交付 README**
   - 文件：config/DataInitializer、README.md
   - 验收：启动后内置 3 名学生与 5 道题目（覆盖 2 个概念，插入顺序严格按 SPEC 2.6）；`mvn clean test` 全部冻结测试全绿；README 含启动步骤、接口清单、设计权衡、迁移 MS SQL / PostgreSQL 需更改的配置（驱动、dialect、连接池）

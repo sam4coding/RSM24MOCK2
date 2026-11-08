@@ -79,4 +79,13 @@
 - **意外或注意点**：
   - 冻结测试套件（`GradingAndReportServiceTest` 8 项测试、`ApiControllerTest` 6 项测试）及项目全部单元测试共 39 项已 100% 全部通过。
 
+## D-009 T6 种子数据核验与全链路交付 README 编写（2026-11-08，程序员完成）
+- **实现内容**：
+  - 核验 `DataInitializer` 的启动种子数据注入逻辑，确认其学生（Alice, Bob, Charlie）及题目（5 道，覆盖 linear-equations 与 fractions）的顺序与内容严格对齐 SPEC 2.6。
+  - 编写了详尽的 `README.md`，内容包含技术栈、启动与测试步骤、种子数据明细、全量 API 接口清单及统一错误响应格式、设计权衡、以及迁移至生产数据库（PostgreSQL / MS SQL Server）的驱动、方言与连接池配置指南。
+- **设计与权衡**：
+  - README 采用中英双语或标准技术文档风格，重点突出了双轨制批改、DTO Record 设计及生产环境数据库平滑迁移的最佳实践。
+- **意外或注意点**：
+  - 执行 `mvn clean test` 确认全部 39 个冻结与集成测试 100% 全绿通过（BUILD SUCCESS）。
+
 <!-- 程序员每完成一项任务，在此追加一条：日期、任务号、做了什么决定、有什么取舍或意外。 -->
