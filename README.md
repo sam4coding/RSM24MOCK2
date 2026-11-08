@@ -1,128 +1,111 @@
-# RSM Student Answer Evaluation & Mastery Reporting API (Mock Challenge 1)
+# RSM Student Answer Evaluation & Mastery Reporting API
 
-> 本项目是 RSM 2024 Mock 挑战赛第一阶段后端服务，提供学生管理、题目管理、即时双轨制自动批改、概念掌握度统计及家长进度报告功能。
-
----
-
-## 1. 技术栈
-
-- **Java 版本**: Java 17
-- **框架**: Spring Boot 3.3.5, Spring Data JPA
-- **数据库**: H2 Database (内存数据库)
-- **构建工具**: Maven (`mvnw` / `mvnw.cmd`)
+## 1. Service Overview
+This service is a backend REST API developed for the RSM Student Answer Evaluation & Mastery Reporting system. It enables automated student and problem management, dual-track answer grading (exact string comparison and numerical tolerance checks), and comprehensive concept mastery and parent progress reporting. Built with Java 17 and Spring Boot, it provides a robust, production-ready educational evaluation engine.
 
 ---
 
-## 2. 启动步骤
+## 2. How to Run
+### Prerequisites
+- **Java 17** installed and configured in `JAVA_HOME`.
+- Maven (use the included `./mvnw` wrapper).
 
-### 2.1 编译与运行测试
-执行 Maven 构建并运行全套测试（包含 39 个冻结/单元集成测试）：
-```bash
-./mvnw clean test
-```
-
-### 2.2 启动应用服务
-在本地启动 Spring Boot 应用：
+### Running the Application
 ```bash
 ./mvnw spring-boot:run
 ```
-启动后，应用将自动注入 SPEC 2.6 规定的预置种子数据（3 名学生，5 道题目）。
-H2 控制台可通过浏览器访问：`http://localhost:8080/h2-console`（JDBC URL: `jdbc:h2:mem:rsmdb`，用户名 `sa`，密码为空）。
+- **Port**: `8080` (default)
+- **H2 Console**: Accessible at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:rsmdb`, Username: `sa`, Password: empty).
+- **Startup Seed Data**: Automatically preloads 3 students (Alice, Bob, Charlie) and 5 problems covering linear equations and fractions upon startup.
 
 ---
 
-## 3. 种子数据 (Startup Seed Data)
+## 3. API Endpoints Table
 
-服务启动时，通过 `DataInitializer` 自动初始化（顺序严格对齐测试契约）：
-- **学生 (3名)**:
-  1. Alice (Grade 6) [ID=1]
-  2. Bob (Grade 7) [ID=2]
-  3. Charlie (Grade 6) [ID=3]
-- **题目 (5道)**:
-  1. `linear-equations`: "Solve for x: 2x = 6" (正确答案: `3`, 容差: `0.01`) [ID=1]
-  2. `linear-equations`: "Solve for x: x + 5 = 12" (正确答案: `7`, 容差: `0.01`)
-  3. `linear-equations`: "Solve for x: 3x - 1 = 8" (正确答案: `3`, 容差: `0.01`)
-  4. `fractions`: "Simplify the fraction: 2/4" (正确答案: `1/2`, 容差: `null`)
-  5. `fractions`: "Calculate 1/2 + 1/4 as a decimal" (正确答案: `0.75`, 容差: `0.01`)
+| Method | Path | Purpose | Example Request / Query Params |
+|---|---|---|---|
+| **POST** | `/students` | Register a new student | `{ "name": "Alice", "grade": 6 }` |
+| **GET** | `/students` | Retrieve all students | None |
+| **POST** | `/problems` | Create a new problem | `{ "concept": "linear-equations", "question": "2x = 6", "correctAnswer": "3", "tolerance": 0.01 }` |
+| **GET** | `/problems` | Retrieve problems (optional concept filter) | `?concept=linear-equations` |
+| **POST** | `/submissions` | Submit an answer and get immediate grading | `{ "studentId": 1, "problemId": 1, "answer": "3.0" }` |
+| **GET** | `/students/{id}/mastery` | Get concept mastery breakdown | None |
+| **GET** | `/students/{id}/report` | Get parent progress report | None |
 
----
-
-## 4. API 接口清单
-
-| Method | Endpoint | Description | Request Body / Query Params | Success Response |
-|---|---|---|---|---|
-| **POST** | `/students` | 创建学生 | `{ "name": "Alice", "grade": 6 }` | 201 Created (Student JSON) |
-| **GET** | `/students` | 获取所有学生 | — | 200 OK (List\<StudentResponse\>) |
-| **POST** | `/problems` | 创建题目 | `{ "concept": "...", "question": "...", "correctAnswer": "...", "tolerance": 0.01 }` | 201 Created (Problem JSON) |
-| **GET** | `/problems` | 获取题目列表 | Query: `?concept=linear-equations` (可选) | 200 OK (List\<ProblemResponse\>) |
-| **POST** | `/submissions` | 提交答案并即时批改 | `{ "studentId": 1, "problemId": 1, "answer": "3.0" }` | 201 Created (SubmissionResponse) |
-| **GET** | `/students/{id}/mastery` | 获取学生各概念掌握度统计 | — | 200 OK (List\<ConceptMasteryResponse\>) |
-| **GET** | `/students/{id}/report` | 获取学生家长进度报告 | — | 200 OK (ParentReportResponse) |
-
-### 统一错误响应格式 (4xx / 5xx)
+### Example Request & Response for `POST /submissions`
+**Request (`POST /submissions`):**
 ```json
 {
-  "timestamp": "2026-11-08T09:30:00Z",
-  "status": 404,
-  "error": "Not Found",
-  "message": "Student with id 99 not found",
-  "path": "/submissions"
+  "studentId": 1,
+  "problemId": 1,
+  "answer": "3.0"
+}
+```
+
+**Response (`201 Created`):**
+```json
+{
+  "id": 1,
+  "studentId": 1,
+  "problemId": 1,
+  "answer": "3.0",
+  "correct": true,
+  "score": 1.0,
+  "correctAnswer": "3",
+  "submittedAt": "2026-11-08T09:30:00Z"
 }
 ```
 
 ---
 
-## 5. 设计权衡与架构决策 (Design Tradeoffs)
+## 4. Grading Rules & Mastery Formula
 
-1. **双轨制判分算法 (Dual-Track Grading)**：
-   - 支持大小写不敏感且去除两端空白的字符串精确比对 (`equalsIgnoreCase` + `trim()`)。
-   - 支持数值型容差比对：当双方均能解析为 `Double` 时，若绝对差值 `|s - c| <= tolerance`（默认 0.01），则判定为正确。
-2. **DTO 独立顶级类设计**：
-   - 采用 Java `record` 实现不可变 DTO 结构，严格契约定义与冻结测试的 import 要求。
-3. **全局异常处理与输入校验**：
-   - 使用 `@RestControllerAdvice` 集中捕获 `MethodArgumentNotValidException` 和 `ResourceNotFoundException`，统一格式返回规范的错误 JSON。
-4. **测试冻结契约保护**：
-   - 测试文件全部冻结，开发过程中严守接口和业务规则边界，确保全链路 39 个测试 100% 全绿。
+### Grading Rules (Dual-Track Algorithm)
+1. **String Comparison**: Trims whitespace (`trim()`) and performs a case-insensitive comparison (`equalsIgnoreCase()`). If matched, marked correct (`isCorrect = true`, `score = 1.0`).
+2. **Numeric Tolerance Comparison**: If both the student answer and the correct answer can be parsed as `Double` values, compute absolute difference $|s - c|$. If $\le \text{tolerance}$ (default `0.01` when problem tolerance is `null`), marked correct.
+3. **Fallback**: Otherwise, marked incorrect (`isCorrect = false`, `score = 0.0`).
+
+### Mastery Formula
+For each concept:
+$$\text{Mastery} = \frac{\text{Correct Submissions}}{\text{Total Attempts}}$$
+Value ranges from `0.0` to `1.0`. Weakest concept is determined among concepts with $\ge 1$ attempts as the one with the lowest mastery score.
 
 ---
 
-## 6. 迁移至生产数据库 (MS SQL / PostgreSQL) 配置指南
+## 5. Design Trade-Offs
+- **H2 In-Memory Database**: Chosen for fast execution, zero external setup overhead, and out-of-the-box support for unit and integration testing.
+- **Unified Error Format**: All 4xx and 5xx responses strictly adhere to a standardized JSON structure (`timestamp`, `status`, `error`, `message`, `path`) to ensure predictable client-side error handling.
+- **Stateless Grading Service**: Grading logic resides entirely in a dedicated domain service (`GradingService`), decoupling business rules from web controllers and persistence layers.
 
-若需将后端从内存 H2 数据库迁移至企业级关系型数据库（如 **PostgreSQL** 或 **MS SQL Server**），需修改 `src/main/resources/application.properties` 中的驱动、连接串、SQL 方言及连接池配置：
+---
 
-### PostgreSQL 迁移配置示例
+## 6. Database Migration (MS SQL / PostgreSQL)
+To migrate from H2 to **PostgreSQL** or **MS SQL Server**, update `src/main/resources/application.properties` and include the respective JDBC driver in `pom.xml`:
+
+### PostgreSQL Configuration
 ```properties
-# 1. 数据库驱动与连接信息
 spring.datasource.url=jdbc:postgresql://localhost:5432/rsmdb
 spring.datasource.driverClassName=org.postgresql.Driver
 spring.datasource.username=db_user
 spring.datasource.password=db_password
-
-# 2. Hibernate 方言与 DDL 策略 (生产环境建议将 ddl-auto 改为 validate 或 none)
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
-
-# 3. 连接池 (Spring Boot 默认使用 HikariCP)
-spring.datasource.hikari.maximum-pool-size=10
-spring.datasource.hikari.minimum-idle=2
-spring.datasource.hikari.idle-timeout=30000
 ```
 
-### MS SQL Server 迁移配置示例
+### MS SQL Server Configuration
 ```properties
-# 1. 数据库驱动与连接信息
 spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=rsmdb;encrypt=true;trustServerCertificate=true
 spring.datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
 spring.datasource.username=sa
 spring.datasource.password=YourStrongPassword!
-
-# 2. Hibernate 方言与 DDL 策略
 spring.jpa.database-platform=org.hibernate.dialect.SQLServerDialect
 spring.jpa.hibernate.ddl-auto=update
-
-# 3. 连接池 (HikariCP)
-spring.datasource.hikari.maximum-pool-size=10
-spring.datasource.hikari.minimum-idle=2
 ```
 
-> **注意**：迁移时请同时在 `pom.xml` 中引入对应数据库的 JDBC 驱动依赖（如 `postgresql` 或 `mssql-jdbc`）。
+---
+
+## 7. Unfinished / Stretch Goals (Not Implemented)
+1. **PDF Homework Generation & OCR Handwriting Scanning**: Automated paper test generation and image/handwriting recognition for student answers.
+2. **Teacher Dashboard & Analytics UI**: Web frontend or administrative endpoints for teachers to monitor classroom-wide performance.
+3. **Authentication & RBAC**: JWT-based security and role-based access control distinguishing students, parents, and teachers.
+4. **Asynchronous Submission Queue**: Message queue (e.g., RabbitMQ/Kafka) integration for high-throughput batch grading and event-driven notifications.

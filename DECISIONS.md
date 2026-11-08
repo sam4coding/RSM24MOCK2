@@ -88,4 +88,13 @@
 - **意外或注意点**：
   - 执行 `mvn clean test` 确认全部 39 个冻结与集成测试 100% 全绿通过（BUILD SUCCESS）。
 
+## D-010 Programmer Handover (Antigravity → Codex) & T6 Completion (2026-11-08)
+- **实现内容**：
+  - 接替 Antigravity 程序员（因额度耗尽 mid-flight 接管），确认 T1–T5 已实现且测试全绿。
+  - 完善并精修了 `README.md`，完整覆盖服务介绍、运行指南（Java 17, `./mvnw spring-boot:run`, 8080 端口, H2 控制台路径）、API 接口表及 `/submissions` 示例请求响应、双轨制批改与掌握度公式、设计取舍（H2 内存数据库、统一错误格式、无状态批改服务）、MS SQL / PostgreSQL 数据库迁移配置（驱动、连接串、方言、ddl-auto）以及未实现的 4 项拓展目标（PDF 作业/OCR、教师看板、权限控制、异步消息队列）。
+- **设计与权衡**：
+  - 严格按照用户最新指定要求结构化组织 README 各节，确保与系统规格书（SPEC.md）及任务书（TASKS.md）完全契合。
+- **意外或注意点**：
+  - 执行 `./mvnw test` 验证全部 39 个测试 100% 通过（BUILD SUCCESS）。
+
 <!-- 程序员每完成一项任务，在此追加一条：日期、任务号、做了什么决定、有什么取舍或意外。 -->
