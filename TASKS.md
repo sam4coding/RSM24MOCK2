@@ -2,7 +2,7 @@
 
 > 规则：一次只做一项；每项完成的标准是验收通过 + commit。测试文件已冻结，任何人不得修改。
 
-- [ ] **T1 统一错误响应模型与全局异常拦截器**
+- [x] **T1 统一错误响应模型与全局异常拦截器**
   - 文件：dto/ErrorResponse、exception/ResourceNotFoundException、exception/GlobalExceptionHandler、src/main/resources/application.properties（H2 内存数据库与 JPA 配置）
   - 验收：触发 ResourceNotFoundException 返回 404，响应体含 timestamp, status, error, message, path 且 error="Not Found"；@Valid 失败返回 400 且 error="Bad Request"；`mvn clean compile` 通过
 
