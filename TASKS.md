@@ -10,7 +10,7 @@
   - 文件：domain/Student、repository/StudentRepository、dto/CreateStudentRequest、dto/StudentResponse、service/StudentService、controller/StudentController
   - 验收：POST /students 合法数据返回 201（或 200）及 student JSON；name 空白或 grade 为空返回 400 统一错误格式；GET /students 返回全部学生
 
-- [ ] **T3 Problem 模块**（Entity、Repository、DTO、Service、Controller 与概念筛选）
+- [x] **T3 Problem 模块**（Entity、Repository、DTO、Service、Controller 与概念筛选）
   - 文件：domain/Problem、repository/ProblemRepository、dto/CreateProblemRequest、dto/ProblemResponse、service/ProblemService、controller/ProblemController
   - 验收：POST /problems 成功创建；GET /problems 不带参数返回全部，带 ?concept=xxx 仅返回对应概念，无匹配返回空数组 []
 

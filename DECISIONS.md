@@ -35,4 +35,17 @@
 - **意外或注意点**：
   - 冻结测试在同一类中覆盖了多个阶段的 Controller 接口，后续各阶段开发逐步点亮对应测试用例即可。
 
+## D-006 T3 Problem 领域模型、仓库、服务及概念筛选接口（2026-11-08，程序员完成）
+- **实现内容**：
+  - 创建了 `Problem` JPA 实体（映射表 `problems`，包含自增主键 `id`、非空白 `concept`、`question`、`correctAnswer`，以及可选容差 `tolerance`）和 `ProblemRepository`（扩展 `findByConcept(String concept)` 方法）。
+  - 完善了独立 DTO Record：`CreateProblemRequest`（校验注解附带明确错误信息）与 `ProblemResponse`。
+  - 实现了 `ProblemService`，支持题目创建（自动修剪两端空白）、概念筛选查询（当 concept 为非空白串时按 concept 过滤，未传或空白时返回全部）、以及按 ID 查找实体（不存在时抛出 `ResourceNotFoundException("Problem with id " + id + " not found")`）。
+  - 实现了 `ProblemController`，提供 `POST /problems`（返回 201 Created）与 `GET /problems`（支持可选 `?concept=` 过滤，返回 200 OK）。
+  - 编写了服务层与控制层单元测试：`ProblemServiceTest`、`ProblemControllerTest`。
+- **设计与权衡**：
+  - 概念筛选查询逻辑对传入的 `concept` 进行了判空与空白字符检查（`isBlank()`）及两端空白修剪（`trim()`），保证查询健壮性；在无匹配概念时由 Repository 自然返回空列表 `[]`。
+  - `Problem` 实体提供了标准 Getter 和 Setter，完美适配冻结测试及后续批改服务的存取需求。
+- **意外或注意点**：
+  - 冻结集成测试中的 `getProblems_conceptFilter_returnsFilteredList` 测试顺畅通过，与 T2 的所有测试保持协同全绿。
+
 <!-- 程序员每完成一项任务，在此追加一条：日期、任务号、做了什么决定、有什么取舍或意外。 -->
