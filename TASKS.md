@@ -14,7 +14,7 @@
   - 文件：domain/Problem、repository/ProblemRepository、dto/CreateProblemRequest、dto/ProblemResponse、service/ProblemService、controller/ProblemController
   - 验收：POST /problems 成功创建；GET /problems 不带参数返回全部，带 ?concept=xxx 仅返回对应概念，无匹配返回空数组 []
 
-- [ ] **T4 Submission 模块与自动批改引擎**
+- [x] **T4 Submission 模块与自动批改引擎**
   - 文件：domain/Submission、repository/SubmissionRepository、dto/CreateSubmissionRequest、dto/SubmissionResponse、service/GradingService、controller/SubmissionController
   - 验收：字符串比较两端 trim 且大小写不敏感；双方可转浮点时按容差（默认 0.01）判定；响应含 correct、score（1.0/0.0）、correctAnswer；studentId 或 problemId 不存在返回 404 统一错误格式
 

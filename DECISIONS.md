@@ -48,4 +48,21 @@
 - **意外或注意点**：
   - 冻结集成测试中的 `getProblems_conceptFilter_returnsFilteredList` 测试顺畅通过，与 T2 的所有测试保持协同全绿。
 
+## D-007 T4 Submission 领域模型与自动批改引擎实现（2026-11-08，程序员完成）
+- **实现内容**：
+  - 创建了 `Submission` JPA 实体（映射表 `submissions`，包含自增主键 `id`、`studentId`、`problemId`、`answer`、`isCorrect`、`score`、`submittedAt`）及 `SubmissionRepository`（提供按学生 ID 查询与按提交时间倒序查询接口）。
+  - 创建了 `SubmissionResponse` DTO Record，并完善了 `CreateSubmissionRequest` 校验信息。
+  - 实现了 `GradingService`：
+    - `checkAnswer` 双轨制判分：针对提交答案与标准答案，先执行 `trim()` 并忽略大小写直接比较；若不匹配，则尝试转换为 `Double`，在有效容差（优先使用题目指定 tolerance，默认取 0.01）范围内通过绝对值差值判定正确性。
+    - `submitAnswer`：校验学生与题目存在性，不存在时抛出 404 规范异常；调用 `checkAnswer` 评定分数（正确 1.0，错误 0.0）；保存 `Submission` 记录并返回包含原题标准答案的 `SubmissionResponse`。
+  - 实现了 `SubmissionController`，提供 `POST /submissions`（返回 201 Created 与提交评判结果）。
+  - 在 `DataInitializer` 中按 SPEC 2.6 注入了种子数据（3 名学生与 5 道题目），使得依赖初始 Alice (ID: 1) 与 Problem 1 的冻结集成测试能够顺利通过。
+  - 创建了 T5 依赖的 DTO 及 `MasteryReportService` 骨架类，移除了 `pom.xml` 中的 `testExcludes`，使 `GradingAndReportServiceTest` 进入编译并点亮了全部 6 个批改单元测试。
+  - 编写了 `SubmissionControllerTest` 验证控制器端点。
+- **设计与权衡**：
+  - 在 `checkAnswer` 中，`Double.parseDouble` 捕获 `NumberFormatException` 后安全兜底返回 false，有效防止非数值或包含表达式格式的字符串引发异常。
+  - `DataInitializer` 在保存初始数据时先判断对应表 `count() == 0`，保证了幂等性，不影响后续测试数据累加。
+- **意外或注意点**：
+  - 解除 `pom.xml` 的排除配置后，冻结测试类 `GradingAndReportServiceTest` 和 `ApiControllerTest` 中当前阶段覆盖的所有测试用例全部绿灯通过。
+
 <!-- 程序员每完成一项任务，在此追加一条：日期、任务号、做了什么决定、有什么取舍或意外。 -->
