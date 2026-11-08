@@ -22,4 +22,17 @@
 - **意外或注意点**：
   - Hibernate 7.4+ 在配置 `spring.jpa.database-platform=org.hibernate.dialect.H2Dialect` 时会有弃用提示（默认会自动推导 H2Dialect），但严格遵循了任务书配置要求，保留该属性设置以满足规范。
 
+## D-005 T2 Student 领域模型、仓库、服务及控制器实现（2026-11-08，程序员完成）
+- **实现内容**：
+  - 创建了 `Student` JPA 实体（映射表 `students`，包含自增主键 `id`、非空白 `name`、非空 `grade`）以及 `StudentRepository`。
+  - 创建了独立 DTO Record：`CreateStudentRequest`（含校验注解）与 `StudentResponse`。
+  - 实现了 `StudentService`，提供学生创建、全量查询列表以及根据 ID 获取实体的业务逻辑。当按 ID 查询不存在时，抛出 `ResourceNotFoundException("Student with id " + id + " not found")`。
+  - 实现了 `StudentController`，提供 `POST /students`（返回 201 Created 与新建学生体，非法请求触发全局 400 统一错误格式）与 `GET /students`（返回 200 OK 与所有学生列表）。
+  - 编写了服务层与控制层单元测试：`StudentServiceTest`、`StudentControllerTest`。
+- **设计与权衡**：
+  - **Spring Boot 版本修正（3.3.5）**：初始 `pom.xml` 中引入了实验性的 Spring Boot 4.1.2 及其拆分 starter，导致 Jackson 3 替代了 Jackson 2、缺少 `AutoConfigureMockMvc`，与 SPEC 1.1 要求及冻结集成测试 `ApiControllerTest` 的 import 不兼容。因此将 parent 修正为标准的 Spring Boot 3.3.5，并使用标准的 `spring-boot-starter-web` 与 `spring-boot-starter-test`。
+  - **模块解耦与编译平滑过渡**：`ApiControllerTest` 同时引用了后续任务的 `CreateProblemRequest` 与 `CreateSubmissionRequest`，依照 SPEC 3.0 先行建立这两个 DTO Record；在 `pom.xml` 中将未实现的 T4/T5 单元测试 `GradingAndReportServiceTest` 暂时排除，确保属于 T2 的两个冻结集成测试（`createStudent_validRequest_returnsStudent` 与 `createStudent_blankName_returns400WithUnifiedErrorFormat`）能够绿灯运行通过。
+- **意外或注意点**：
+  - 冻结测试在同一类中覆盖了多个阶段的 Controller 接口，后续各阶段开发逐步点亮对应测试用例即可。
+
 <!-- 程序员每完成一项任务，在此追加一条：日期、任务号、做了什么决定、有什么取舍或意外。 -->

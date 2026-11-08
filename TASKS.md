@@ -6,7 +6,7 @@
   - 文件：dto/ErrorResponse、exception/ResourceNotFoundException、exception/GlobalExceptionHandler、src/main/resources/application.properties（H2 内存数据库与 JPA 配置）
   - 验收：触发 ResourceNotFoundException 返回 404，响应体含 timestamp, status, error, message, path 且 error="Not Found"；@Valid 失败返回 400 且 error="Bad Request"；`mvn clean compile` 通过
 
-- [ ] **T2 Student 模块**（Entity、Repository、DTO、Service、Controller 与校验）
+- [x] **T2 Student 模块**（Entity、Repository、DTO、Service、Controller 与校验）
   - 文件：domain/Student、repository/StudentRepository、dto/CreateStudentRequest、dto/StudentResponse、service/StudentService、controller/StudentController
   - 验收：POST /students 合法数据返回 201（或 200）及 student JSON；name 空白或 grade 为空返回 400 统一错误格式；GET /students 返回全部学生
 
