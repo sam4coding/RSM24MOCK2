@@ -18,7 +18,7 @@
   - 文件：domain/Submission、repository/SubmissionRepository、dto/CreateSubmissionRequest、dto/SubmissionResponse、service/GradingService、controller/SubmissionController
   - 验收：字符串比较两端 trim 且大小写不敏感；双方可转浮点时按容差（默认 0.01）判定；响应含 correct、score（1.0/0.0）、correctAnswer；studentId 或 problemId 不存在返回 404 统一错误格式
 
-- [ ] **T5 掌握度计算与家长报告**
+- [x] **T5 掌握度计算与家长报告**
   - 文件：dto/ConceptMasteryResponse、dto/ParentReportResponse、service/MasteryReportService、controller/ReportController
   - 验收：GET /students/{id}/mastery 按 concept 汇总 attempts、correct、mastery；GET /students/{id}/report 含 studentName、总提交次数、最近提交时间、概念列表、weakestConcept（attempts ≥ 1 中最低者）；学生不存在返回 404
 

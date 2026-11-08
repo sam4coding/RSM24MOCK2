@@ -65,4 +65,18 @@
 - **意外或注意点**：
   - 解除 `pom.xml` 的排除配置后，冻结测试类 `GradingAndReportServiceTest` 和 `ApiControllerTest` 中当前阶段覆盖的所有测试用例全部绿灯通过。
 
+## D-008 T5 掌握度计算 (Mastery) 与家长报告 (Parent Report) 统计实现（2026-11-08，程序员完成）
+- **实现内容**：
+  - 确认并使用了独立 DTO Record：`ConceptMasteryResponse`（`concept`, `attempts`, `correct`, `mastery`）与 `ParentReportResponse`（`studentId`, `studentName`, `totalSubmissions`, `mostRecentSubmissionTime`, `weakestConcept`, `masteryPerConcept`）。
+  - 完善了 `MasteryReportService`：
+    - `getStudentMastery(Long studentId)`：校验学生存在性（不存在抛出 404）；通过 `problemRepository.findAll()` 建立题目 ID 映射字典（严格对齐单元测试中的 Mock 行为）；查询该学生的所有提交记录并按概念（Concept）聚合答题总次数、正确次数及正确率（`correct / attempts`）。
+    - `getParentReport(Long studentId)`：校验学生存在性；统计总提交次数、通过提交流最大值提取最近一次作答时间戳 `mostRecentSubmissionTime`（无作答则为 null）；获取概念掌握度列表并在 `attempts >= 1` 的概念中精确找出 mastery 最低者标记为 `weakestConcept`（无作答则为 null）。
+  - 实现了 `ReportController`，提供 `GET /students/{id}/mastery` 与 `GET /students/{id}/report` 接口，学生不存在时由全局异常处理器统一转换为 404 JSON。
+  - 编写了 `ReportControllerTest` 覆盖正常响应与 404 错误场景。
+- **设计与权衡**：
+  - 为完全适配冻结单元测试 `GradingAndReportServiceTest` 对 `problemRepository.findAll()` 的 Mock 行为，采用全表概念字典映射机制关联作答记录中的题目，保证测试无缝兼容。
+  - 最薄弱概念计算严格遵循 SPEC：仅在 `attempts >= 1` 的概念集合中提取掌握度最低项，若学生尚无任何提交记录则安全返回 `null`。
+- **意外或注意点**：
+  - 冻结测试套件（`GradingAndReportServiceTest` 8 项测试、`ApiControllerTest` 6 项测试）及项目全部单元测试共 39 项已 100% 全部通过。
+
 <!-- 程序员每完成一项任务，在此追加一条：日期、任务号、做了什么决定、有什么取舍或意外。 -->
